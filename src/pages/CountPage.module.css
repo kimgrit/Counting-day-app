@@ -1,0 +1,103 @@
+.root {
+  height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.content {
+  padding: 16px 20px 80px;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.input {
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 10px 12px;
+  font-size: 16px; /* iOS 확대 방지용 최소 16px */
+  outline: none;
+}
+
+.input:focus {
+  border-color: #3182f6;
+  box-shadow: 0 0 0 1px rgba(49, 130, 246, 0.15);
+}
+
+.milestoneSection {
+  margin-top: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tabButton {
+  flex: 1;
+  border-radius: 999px;
+}
+
+.tabButtonActive {
+  background-color: #111827;
+  color: #ffffff;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: #f9fafb;
+  text-align: left;
+}
+
+.cardActive {
+  border-color: #3182f6;
+  background: #f2f6ff;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.primaryButton {
+  width: 100%;
+}
+
+
+
