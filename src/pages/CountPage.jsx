@@ -1,127 +1,191 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Text, Button } from '@toss/tds-mobile';
-import { adaptive } from '@toss/tds-colors';
 import styles from './CountPage.module.css';
-import { getMilestoneDates, formatKoreanDate } from '../utils/dday';
-import { useAnniversaries } from '../hooks/useAnniversaries';
+import {
+  getNDaysDate,
+  formatKoreanDateWithWeekday,
+} from '../utils/dday';
 import { useAppIntoss } from '../hooks/useAppIntoss';
 import BannerAd from '../components/BannerAd';
 
+const AUTO_MILESTONE_DAYS = [100, 200, 300, 500, 1000];
+const TAB_AUTO = 'auto';
+const TAB_MANUAL = 'manual';
+
 function CountPage() {
   const navigate = useNavigate();
-  const { addAnniversary } = useAnniversaries();
   const { logClick, logScreen } = useAppIntoss();
 
-  const [title, setTitle] = useState('');
+  const [tab, setTab] = useState(TAB_AUTO);
   const [baseDate, setBaseDate] = useState('');
-  const [selectedDay, setSelectedDay] = useState(100);
+  const [countFromOne, setCountFromOne] = useState(true);
+  const [nDaysInput, setNDaysInput] = useState('');
 
   useEffect(() => {
     logScreen('View_page_count');
   }, [logScreen]);
 
   const base = baseDate ? new Date(baseDate) : null;
-  const milestones = base ? getMilestoneDates(base) : [];
 
-  const handleSave = () => {
-    if (!base || !title.trim()) return;
-    logClick('Click_btn_save_anniversary');
-    addAnniversary(title.trim(), baseDate);
+  const nDaysNum =
+    nDaysInput.trim() === '' ? null : parseInt(nDaysInput, 10);
+  const nDaysValid =
+    nDaysNum !== null &&
+    !Number.isNaN(nDaysNum) &&
+    nDaysNum >= 1 &&
+    Number.isInteger(nDaysNum);
+  const nDaysResult =
+    base && nDaysValid ? getNDaysDate(base, nDaysNum, countFromOne) : null;
+
+  const handleAlarm = () => {
+    logClick('Click_btn_anniversary_alarm');
     navigate('/home');
   };
-
-  const isSaveDisabled = !base || !title.trim();
 
   return (
     <div className={styles.root}>
       <div className={styles.content}>
         <header className={styles.header}>
-          <Text size={18} fontWeight="bold">
-            기념일 계산기
-          </Text>
-          <Text size={13} color={adaptive.grey700}>
-            기준이 되는 날을 입력하면 100일, 200일, 300일을 바로 알려드려요.
-          </Text>
+          <h1 className={styles.title}>기념일 계산기</h1>
+          <p className={styles.subtitle}>
+            기준 일자를 입력해서 다가오는 기념일을 계산해요.
+          </p>
         </header>
 
-        <section className={styles.formSection}>
-          <div className={styles.field}>
-            <label className={styles.label}>기념일 이름</label>
+        <div className={styles.modeTabs}>
+          <button
+            type="button"
+            className={
+              tab === TAB_AUTO
+                ? `${styles.modeTab} ${styles.modeTabActive}`
+                : styles.modeTab
+            }
+            onClick={() => setTab(TAB_AUTO)}
+          >
+            자동 계산기
+          </button>
+          <button
+            type="button"
+            className={
+              tab === TAB_MANUAL
+                ? `${styles.modeTab} ${styles.modeTabManualActive}`
+                : styles.modeTab
+            }
+            onClick={() => setTab(TAB_MANUAL)}
+          >
+            수동 계산기
+          </button>
+        </div>
+
+        {tab === TAB_AUTO && (
+          <section className={styles.panel}>
+            <p className={styles.panelLabel}>기준 날짜는?</p>
             <input
-              className={styles.input}
-              placeholder="예: 우리 사귄 날"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className={styles.field}>
-            <label className={styles.label}>기준 날짜</label>
-            <input
-              className={styles.input}
               type="date"
+              className={styles.dateDisplay}
               value={baseDate}
               onChange={(e) => setBaseDate(e.target.value)}
+              aria-label="기준 날짜"
             />
-          </div>
-        </section>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={countFromOne}
+                onChange={(e) => setCountFromOne(e.target.checked)}
+              />
+              <span className={styles.checkboxText}>
+                기준일을 1일로 계산
+              </span>
+            </label>
+            {base && (
+              <div className={styles.autoList}>
+                {AUTO_MILESTONE_DAYS.map((n) => {
+                  const date = getNDaysDate(base, n, countFromOne);
+                  return (
+                    <div key={n} className={styles.autoRow}>
+                      <button
+                        type="button"
+                        className={styles.autoDayButton}
+                        onClick={() => {}}
+                      >
+                        {n}일
+                      </button>
+                      <span className={styles.autoDateText}>
+                        {formatKoreanDateWithWeekday(date)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
 
-        {base && (
-          <section className={styles.milestoneSection}>
-            <div className={styles.tabs}>
-              {[100, 200, 300].map((n) => (
-                <Button
-                  key={n}
-                  className={
-                    selectedDay === n
-                      ? `${styles.tabButton} ${styles.tabButtonActive}`
-                      : styles.tabButton
-                  }
-                  onClick={() => setSelectedDay(n)}
-                >
-                  {n}일
-                </Button>
-              ))}
-            </div>
-
-            <div className={styles.cards}>
-              {milestones.map((m) => (
-                <div
-                  key={m.day}
-                  className={
-                    m.day === selectedDay
-                      ? `${styles.card} ${styles.cardActive}`
-                      : styles.card
-                  }
-                >
-                  <Text size={13} color={adaptive.grey700}>
-                    {m.day}일 되는 날
-                  </Text>
-                  <Text size={18} fontWeight="bold">
-                    {formatKoreanDate(m.date)}
-                  </Text>
-                </div>
-              ))}
+        {tab === TAB_MANUAL && (
+          <section className={styles.panel}>
+            <p className={styles.panelLabel}>기준 날짜는?</p>
+            <input
+              type="date"
+              className={styles.dateDisplay}
+              value={baseDate}
+              onChange={(e) => setBaseDate(e.target.value)}
+              aria-label="기준 날짜"
+            />
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={countFromOne}
+                onChange={(e) => setCountFromOne(e.target.checked)}
+              />
+              <span className={styles.checkboxText}>
+                기준일을 1일로 계산
+              </span>
+            </label>
+            <p className={styles.panelLabel}>
+              기준 날짜의 며칠 뒤가 궁금한가요?
+            </p>
+            <input
+              className={styles.input}
+              type="number"
+              min="1"
+              inputMode="numeric"
+              placeholder="600일 뒤"
+              value={nDaysInput}
+              onChange={(e) => setNDaysInput(e.target.value)}
+            />
+            <div className={styles.manualResultRow}>
+              <button
+                type="button"
+                className={styles.nDayButton}
+                onClick={() => {}}
+              >
+                +{nDaysInput.trim() || '600'}일
+              </button>
+              <span className={styles.manualDateText}>
+                {nDaysResult
+                  ? formatKoreanDateWithWeekday(nDaysResult)
+                  : '—'}
+              </span>
             </div>
           </section>
         )}
 
         <section className={styles.actions}>
-          <Button
+          <button
+            type="button"
             className={styles.primaryButton}
-            disabled={isSaveDisabled}
-            onClick={handleSave}
+            onClick={handleAlarm}
           >
-            나만의 기념일 등록하기
-          </Button>
+            기념일 알림 받기
+          </button>
         </section>
       </div>
 
-      <BannerAd placement="count-page-bottom" />
+      <BannerAd />
     </div>
   );
 }
 
 export default CountPage;
-
-

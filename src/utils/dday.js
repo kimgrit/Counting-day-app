@@ -5,6 +5,8 @@ export function addDays(baseDate, days) {
   return d;
 }
 
+const MILESTONE_DAYS = [100, 200, 300, 400, 500];
+
 export function getMilestoneDates(base) {
   const baseMidnight = new Date(
     base.getFullYear(),
@@ -12,10 +14,26 @@ export function getMilestoneDates(base) {
     base.getDate(),
   );
 
-  return [100, 200, 300].map((n) => ({
+  return MILESTONE_DAYS.map((n) => ({
     day: n,
     date: addDays(baseMidnight, n),
   }));
+}
+
+/**
+ * N일째 날짜 계산
+ * @param {Date} base - 기준일
+ * @param {number} n - N일
+ * @param {boolean} countFromOne - true: 기준일=1일차, false: 기준일=0일차
+ */
+export function getNDaysDate(base, n, countFromOne = true) {
+  const baseMidnight = new Date(
+    base.getFullYear(),
+    base.getMonth(),
+    base.getDate(),
+  );
+  const daysToAdd = countFromOne ? n - 1 : n;
+  return addDays(baseMidnight, daysToAdd);
 }
 
 export function calcDday(target, today = new Date()) {
@@ -33,10 +51,18 @@ export function calcDday(target, today = new Date()) {
   return Math.round(diff / (1000 * 60 * 60 * 24));
 }
 
+const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
+
 export function formatKoreanDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}.${month}.${day}`;
+}
+
+export function formatKoreanDateWithWeekday(date) {
+  const base = formatKoreanDate(date);
+  const weekday = WEEKDAY_KO[date.getDay()];
+  return `${base}(${weekday})`;
 }
 
