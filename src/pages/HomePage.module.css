@@ -1,3 +1,11 @@
+/* 색상: 보라 액센트 */
+:root {
+  --count-primary: #725CFF;
+  --count-primary-hover: #6d28d9;
+  --count-panel-bg: #f5f3ff;
+  --count-banner-bg: #e5e7eb;
+}
+
 .root {
   min-height: 100vh;
   max-width: 100vw;

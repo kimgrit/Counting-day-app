@@ -36,6 +36,19 @@ export function getNDaysDate(base, n, countFromOne = true) {
   return addDays(baseMidnight, daysToAdd);
 }
 
+/**
+ * 여러 N일째에 대한 날짜 목록 (HomePage 저장용)
+ * @param {Date} base - 기준일
+ * @param {number[]} days - [100, 200, 300, 500, 1000] 등
+ * @param {boolean} countFromOne
+ */
+export function getMilestonesForDays(base, days, countFromOne = true) {
+  return days.map((day) => ({
+    day,
+    date: getNDaysDate(base, day, countFromOne),
+  }));
+}
+
 export function calcDday(target, today = new Date()) {
   const t = new Date(
     target.getFullYear(),

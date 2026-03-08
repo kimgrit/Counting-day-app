@@ -6,6 +6,7 @@ import {
   formatKoreanDateWithWeekday,
 } from '../utils/dday';
 import { useAppIntoss } from '../hooks/useAppIntoss';
+import { useAnniversaries } from '../hooks/useAnniversaries';
 import BannerAd from '../components/BannerAd';
 
 const AUTO_MILESTONE_DAYS = [100, 200, 300, 500, 1000];
@@ -15,11 +16,13 @@ const TAB_MANUAL = 'manual';
 function CountPage() {
   const navigate = useNavigate();
   const { logClick, logScreen } = useAppIntoss();
+  const { addAnniversary } = useAnniversaries();
 
   const [tab, setTab] = useState(TAB_AUTO);
   const [baseDate, setBaseDate] = useState('');
   const [countFromOne, setCountFromOne] = useState(true);
   const [nDaysInput, setNDaysInput] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     logScreen('View_page_count');
@@ -37,9 +40,29 @@ function CountPage() {
   const nDaysResult =
     base && nDaysValid ? getNDaysDate(base, nDaysNum, countFromOne) : null;
 
-  const handleAlarm = () => {
+  const handleAlarmClick = () => {
     logClick('Click_btn_anniversary_alarm');
+    if (!baseDate) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmYes = () => {
+    if (!baseDate) {
+      setShowConfirmModal(false);
+      return;
+    }
+    if (tab === TAB_AUTO) {
+      addAnniversary(baseDate, { countFromOne });
+    } else {
+      const extraDays = nDaysValid ? [nDaysNum] : [];
+      addAnniversary(baseDate, { countFromOne, extraDays });
+    }
+    setShowConfirmModal(false);
     navigate('/home');
+  };
+
+  const handleConfirmNo = () => {
+    setShowConfirmModal(false);
   };
 
   return (
@@ -172,18 +195,51 @@ function CountPage() {
           </section>
         )}
 
-        <section className={styles.actions}>
+        {/* <section className={styles.actions}>
           <button
             type="button"
             className={styles.primaryButton}
-            onClick={handleAlarm}
+            onClick={handleAlarmClick}
+            disabled={!baseDate}
           >
             기념일 알림 받기
           </button>
-        </section>
+        </section> */}
       </div>
 
       <BannerAd />
+
+      {/* {showConfirmModal && (
+        <div className={styles.modalOverlay} onClick={handleConfirmNo}>
+          <div
+            className={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-modal-title"
+          >
+            <p id="confirm-modal-title" className={styles.modalMessage}>
+              현재 기준 날짜 기준으로 디데이 알림을 보내드릴까요?
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.modalButtonNo}
+                onClick={handleConfirmNo}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={styles.modalButtonYes}
+                onClick={handleConfirmYes}
+              >
+                알림 받기
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 }
