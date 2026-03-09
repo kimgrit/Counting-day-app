@@ -3,7 +3,7 @@ import { useTossBanner } from '../hooks/useTossBanner';
 import './BannerAd.css';
 
 /** 테스트용 배너 광고 ID (리스트형) - 문서 기준 */
-const TEST_BANNER_ID = 'ait-ad-test-banner-id';
+const TEST_BANNER_ID = 'ait.v2.live.c7dc8698829f4606';
 
 function BannerAd() {
   const containerRef = useRef(null);
