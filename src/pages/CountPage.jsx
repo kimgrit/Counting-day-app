@@ -51,11 +51,12 @@ function CountPage() {
       setShowConfirmModal(false);
       return;
     }
+    const title = '기념일';
     if (tab === TAB_AUTO) {
-      addAnniversary(baseDate, { countFromOne });
+      addAnniversary(title, baseDate, { countFromOne });
     } else {
       const extraDays = nDaysValid ? [nDaysNum] : [];
-      addAnniversary(baseDate, { countFromOne, extraDays });
+      addAnniversary(title, baseDate, { countFromOne, extraDays });
     }
     setShowConfirmModal(false);
     navigate('/home');
@@ -195,7 +196,7 @@ function CountPage() {
           </section>
         )}
 
-        {/* <section className={styles.actions}>
+        <section className={styles.actions}>
           <button
             type="button"
             className={styles.primaryButton}
@@ -204,12 +205,19 @@ function CountPage() {
           >
             기념일 알림 받기
           </button>
-        </section> */}
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={() => navigate('/home')}
+          >
+            내 기념일 보러가기
+          </button>
+        </section>
       </div>
 
       <BannerAd />
 
-      {/* {showConfirmModal && (
+      {showConfirmModal && (
         <div className={styles.modalOverlay} onClick={handleConfirmNo}>
           <div
             className={styles.modal}
@@ -239,7 +247,7 @@ function CountPage() {
             </div>
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

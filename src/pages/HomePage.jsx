@@ -1,132 +1,187 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Text, Button } from '@toss/tds-mobile';
-import { adaptive } from '@toss/tds-colors';
 import styles from './HomePage.module.css';
 import { useAnniversaries } from '../hooks/useAnniversaries';
-import { formatKoreanDate, calcDday } from '../utils/dday';
+import { formatKoreanDateWithWeekday } from '../utils/dday';
 import { useAppIntoss } from '../hooks/useAppIntoss';
 import { registerNotificationForAnniversary } from '../utils/notifications';
 import BannerAd from '../components/BannerAd';
 
+const ORDINALS = ['첫', '두', '세', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+
+function getDisplayName(item, index) {
+  if (item.customName && item.customName.trim()) {
+    return item.customName.trim();
+  }
+  const ord = ORDINALS[index] ?? `${index + 1}`;
+  return `${ord}번째 기념일`;
+}
+
 function HomePage() {
   const navigate = useNavigate();
-  const { items, toggleNotification } = useAnniversaries();
+  const { items, updateAnniversaryName, toggleNotification } = useAnniversaries();
   const { logClick, logScreen } = useAppIntoss();
+
+  const [expandedId, setExpandedId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editingValue, setEditingValue] = useState('');
 
   useEffect(() => {
     logScreen('View_page_home');
   }, [logScreen]);
 
   const handleNotificationToggle = async (item, enable) => {
-    logClick('Click_btn_notification', {
-      enable,
-      anniversaryId: item.id,
-    });
-
+    logClick('Click_btn_notification', { enable, anniversaryId: item.id });
     if (enable) {
       await registerNotificationForAnniversary(item);
     }
-
     toggleNotification(item.id, enable);
   };
+
+  const handleEditStart = (item, displayName, e) => {
+    e.stopPropagation();
+    setEditingId(item.id);
+    setEditingValue(displayName);
+  };
+
+  const handleEditSave = (id) => {
+    updateAnniversaryName(id, editingValue.trim() || null);
+    setEditingId(null);
+    setEditingValue('');
+  };
+
+  const handleCardClick = (itemId) => {
+    setExpandedId((prev) => (prev === itemId ? null : itemId));
+  };
+
+  const displayOrder = [...items].reverse();
 
   return (
     <div className={styles.root}>
       <div className={styles.content}>
         <header className={styles.header}>
-          <div>
-            <span className={styles.title}>
-              <Text size={18} fontWeight="bold">
-                나의 기념일
-              </Text>
-            </span>
-            <Text size={13} color={adaptive.grey700}>
-              등록한 기념일의 D-day와 알림을 한눈에 확인해요.
-            </Text>
-          </div>
-          <Button className={styles.headerButton} onClick={() => navigate('/')}>
+          <h1 className={styles.pageTitle}>나의 기념일</h1>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={() => navigate('/')}
+          >
             새 기념일 계산하기
-          </Button>
+          </button>
         </header>
 
         <section className={styles.listSection}>
           {items.length === 0 && (
             <div className={styles.empty}>
-              <Text size={14} color={adaptive.grey700}>
-                아직 저장된 기념일이 없어요.
-              </Text>
-              <Button
+              <p className={styles.emptyText}>아직 저장된 기념일이 없어요.</p>
+              <button
+                type="button"
                 className={styles.emptyButton}
                 onClick={() => navigate('/')}
               >
                 첫 기념일 등록하러 가기
-              </Button>
+              </button>
             </div>
           )}
 
-          {items.map((item) => {
+          {displayOrder.map((item, index) => {
             const base = new Date(item.baseDate);
+            const displayName = getDisplayName(item, index);
+            const isExpanded = expandedId === item.id;
+            const isEditing = editingId === item.id;
 
             return (
-              <article key={item.id} className={styles.card}>
+              <article
+                key={item.id}
+                className={styles.card}
+                onClick={() => !isEditing && handleCardClick(item.id)}
+              >
                 <div className={styles.cardHeader}>
-                  <Text size={15} fontWeight="bold">
-                    {item.title}
-                  </Text>
-                  <Text size={12} color={adaptive.grey700}>
-                    기준일 {formatKoreanDate(base)}
-                  </Text>
+                  <div className={styles.cardTitleRow}>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className={styles.editInput}
+                        value={editingValue}
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        onBlur={() => handleEditSave(item.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleEditSave(item.id);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                        aria-label="기념일 이름"
+                      />
+                    ) : (
+                      <span className={styles.cardName}>{displayName}</span>
+                    )}
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        className={styles.modifyButton}
+                        onClick={(e) => handleEditStart(item, displayName, e)}
+                      >
+                        수정
+                      </button>
+                    )}
+                  </div>
+                  <p className={styles.cardBaseDate}>
+                    {formatKoreanDateWithWeekday(base)}
+                  </p>
                 </div>
 
-                <div className={styles.cardBody}>
-                  {item.milestones.map((m) => {
-                    const date = new Date(m.date);
-                    const dday = calcDday(date);
-                    const label =
-                      dday === 0
-                        ? 'D-Day'
-                        : dday > 0
-                        ? `D-${dday}`
-                        : `D+${Math.abs(dday)}`;
-
-                    return (
-                      <div key={m.day} className={styles.milestoneRow}>
-                        <Text size={13}>
-                          {m.day}일 · {formatKoreanDate(date)}
-                        </Text>
-                        <Text size={12} color={adaptive.grey700}>
-                          {label}
-                        </Text>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <Button
-                    className={styles.notifyButton}
-                    onClick={() =>
-                      handleNotificationToggle(
-                        item,
-                        !item.notificationsEnabled,
-                      )
-                    }
-                  >
-                    {item.notificationsEnabled ? '알림 끄기' : '알림 받기'}
-                  </Button>
-                </div>
+                {isExpanded && (
+                  <>
+                    <div
+                      className={styles.cardBody}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {item.milestones.map((m) => {
+                        const date = new Date(m.date);
+                        return (
+                          <div key={m.day} className={styles.milestoneRow}>
+                            <span className={styles.milestoneButton}>
+                              {m.day}일
+                            </span>
+                            <span className={styles.milestoneDate}>
+                              {formatKoreanDateWithWeekday(date)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div
+                      className={styles.cardFooter}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        className={
+                          item.notificationsEnabled
+                            ? styles.notiButtonOff
+                            : styles.notiButtonOn
+                        }
+                        onClick={() =>
+                          handleNotificationToggle(
+                            item,
+                            !item.notificationsEnabled,
+                          )
+                        }
+                      >
+                        {item.notificationsEnabled ? '알림 끄기' : '알림 받기'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </article>
             );
           })}
         </section>
       </div>
 
-      <BannerAd placement="home-page-bottom" />
+      <BannerAd />
     </div>
   );
 }
 
 export default HomePage;
-
-

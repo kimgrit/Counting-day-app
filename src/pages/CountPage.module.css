@@ -247,13 +247,34 @@
 
 .actions {
   margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
 }
 
 .primaryButton {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 14px 20px !important;
   font-size: 16px !important;
   border-radius: 12px !important;
+}
+
+.secondaryButton {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid var(--count-primary);
+  background: #fff;
+  color: var(--count-primary);
+  cursor: pointer;
+}
+
+.secondaryButton:active {
+  background: #f5f3ff;
 }
 
 /* 확인 팝업 */

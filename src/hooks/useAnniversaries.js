@@ -4,24 +4,6 @@ import { getMilestonesForDays } from '../utils/dday';
 const STORAGE_KEY = 'anniversaries';
 const DEFAULT_MILESTONE_DAYS = [100, 200, 300, 500, 1000];
 
-const ORDINAL_KO = [
-  '첫',
-  '두',
-  '세',
-  '네',
-  '다섯',
-  '여섯',
-  '일곱',
-  '여덟',
-  '아홉',
-  '열',
-];
-
-function getOrdinalKo(n) {
-  if (n >= 1 && n <= 10) return ORDINAL_KO[n - 1] + '번째';
-  return `${n}번째`;
-}
-
 export function useAnniversaries() {
   const [items, setItems] = useState([]);
 
@@ -43,13 +25,13 @@ export function useAnniversaries() {
   }, [items]);
 
   /**
+   * @param {string} title
    * @param {string} baseDateStr - YYYY-MM-DD
    * @param {{ countFromOne?: boolean, extraDays?: number[] }} [options]
    *   - countFromOne: 기준일을 1일차로 셀지 (기본 true)
    *   - extraDays: 수동 계산기에서 추가한 N일 (예: [77])
-   * 제목은 자동으로 "첫번째 기념일", "두번째 기념일" ... 로 설정됨 (수정 가능)
    */
-  const addAnniversary = (baseDateStr, options = {}) => {
+  const addAnniversary = (title, baseDateStr, options = {}) => {
     const { countFromOne = true, extraDays = [] } = options;
     const base = new Date(baseDateStr);
 
@@ -63,27 +45,23 @@ export function useAnniversaries() {
       }),
     );
 
-    const nextOrder = items.length + 1;
-    const title = getOrdinalKo(nextOrder) + ' 기념일';
-
     const newItem = {
       id: `${Date.now()}-${Math.random()}`,
       title,
       baseDate: baseDateStr,
       milestones,
       notificationsEnabled: false,
+      customName: null,
     };
 
     setItems((prev) => [newItem, ...prev]);
     return newItem;
   };
 
-  const updateTitle = (id, newTitle) => {
-    const trimmed = String(newTitle).trim();
-    if (!trimmed) return;
+  const updateAnniversaryName = (id, customName) => {
     setItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, title: trimmed } : item,
+        item.id === id ? { ...item, customName: customName || null } : item,
       ),
     );
   };
@@ -96,6 +74,6 @@ export function useAnniversaries() {
     );
   };
 
-  return { items, addAnniversary, updateTitle, toggleNotification };
+  return { items, addAnniversary, updateAnniversaryName, toggleNotification };
 }
 
