@@ -196,7 +196,7 @@ function CountPage() {
           </section>
         )}
 
-        <section className={styles.actions}>
+        {/* <section className={styles.actions}>
           <button
             type="button"
             className={styles.primaryButton}
@@ -212,7 +212,7 @@ function CountPage() {
           >
             내 기념일 보러가기
           </button>
-        </section>
+        </section> */}
       </div>
 
       <BannerAd />
