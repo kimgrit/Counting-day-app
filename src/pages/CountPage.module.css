@@ -220,9 +220,7 @@
   cursor: pointer;
 }
 
-.primaryButton:active {
-  background: var(--count-primary-hover);
-}
+
 
 
 .input:focus {
