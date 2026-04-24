@@ -18,7 +18,7 @@ const TAB_MANUAL = 'manual';
 function CountPage() {
   const navigate = useNavigate();
   const { logClick, logScreen } = useAppIntoss();
-  const { addAnniversary } = useAnniversaries();
+  const { items, addAnniversary } = useAnniversaries();
 
   const [tab, setTab] = useState(TAB_AUTO);
   const [baseDate, setBaseDate] = useState('');
@@ -94,14 +94,46 @@ function CountPage() {
     setShowConfirmModal(false);
   };
 
+  const showRegister =
+    (tab === TAB_AUTO && isBaseValid && autoCalculated) ||
+    (tab === TAB_MANUAL && isBaseValid && manualCalculated && nDaysValid);
+
   return (
     <div className={styles.root}>
       <div className={styles.content}>
         <header className={styles.header}>
-          <h1 className={styles.title}>기념일 계산기</h1>
-          <p className={styles.subtitle}>
-            기준 일자를 입력해서 다가오는 기념일을 계산해요.
-          </p>
+          <div className={styles.headerRow}>
+            <div>
+              <h1 className={styles.title}>기념일 계산기</h1>
+              <p className={styles.subtitle}>
+                기준 일자를 입력해서 다가오는 기념일을 계산해요.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={styles.homeButton}
+              aria-label="내 기념일"
+              onClick={() => {
+                navigate('/home');
+              }}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 10.5L12 4l8 6.5v9.5a2 2 0 0 1-2 2h-4.5v-6.5h-3V22H6a2 2 0 0 1-2-2v-9.5Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </header>
 
         <div className={styles.modeTabs}>
@@ -255,6 +287,26 @@ function CountPage() {
                 </span>
               </div>
             )}
+          </section>
+        )}
+
+        {showRegister && (
+          <section className={styles.registerBar}>
+            <button
+              type="button"
+              className={styles.registerButton}
+              onClick={() => {
+                const isFirst = (items?.length ?? 0) === 0;
+                const item = addAnniversary('기념일', baseDate, {
+                  countFromOne,
+                  customName: isFirst ? '첫번째 기념일' : null,
+                });
+                logClick('Click_btn_register_anniversary', { anniversaryId: item?.id });
+                navigate('/home');
+              }}
+            >
+              기념일 등록
+            </button>
           </section>
         )}
 

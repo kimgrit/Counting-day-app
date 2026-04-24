@@ -7,13 +7,14 @@
 }
 
 .root {
-  min-height: 100vh;
+  height: 100vh;
   max-width: 100vw;
   width: 100%;
   overflow-x: hidden;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .content {
@@ -24,11 +25,40 @@
   margin: 0 auto;
   box-sizing: border-box;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .header {
   margin-bottom: 16px;
   text-align: left;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.homeButton {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: none;
+  background: #0b0f19;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeButton:active {
+  opacity: 0.9;
 }
 
 .title {
@@ -267,23 +297,6 @@
   transition: none;
 }
 
-.autoDayButton:hover,
-.autoDayButton:active,
-.autoDayButton:focus,
-.autoDayButton:focus-visible,
-.nDayButton:hover,
-.nDayButton:active,
-.nDayButton:focus,
-.nDayButton:focus-visible {
-  background: var(--count-primary) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
 .autoDayButton {
   min-width: 80px;
 }
@@ -328,6 +341,26 @@
   display: flex;
   gap: 10px;
   align-items: stretch;
+}
+
+.registerBar {
+  margin-top: 16px;
+}
+
+.registerButton {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: none;
+  background: var(--count-primary);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.registerButton:active {
+  background: var(--count-primary-hover);
 }
 
 .primaryButton {
