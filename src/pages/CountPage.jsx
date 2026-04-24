@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CountPage.module.css';
 import {
@@ -7,7 +7,9 @@ import {
 } from '../utils/dday';
 import { useAppIntoss } from '../hooks/useAppIntoss';
 import { useAnniversaries } from '../hooks/useAnniversaries';
-import BannerAd from '../components/BannerAd';
+import DateTextInput from '../components/DateTextInput';
+
+const BannerAd = lazy(() => import('../components/BannerAd'));
 
 const AUTO_MILESTONE_DAYS = [100, 200, 300, 500, 1000];
 const TAB_AUTO = 'auto';
@@ -23,12 +25,38 @@ function CountPage() {
   const [countFromOne, setCountFromOne] = useState(true);
   const [nDaysInput, setNDaysInput] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+  const [autoCalculated, setAutoCalculated] = useState(false);
+  const [manualCalculated, setManualCalculated] = useState(false);
 
   useEffect(() => {
     logScreen('View_page_count');
   }, [logScreen]);
 
+  useEffect(() => {
+    setAutoCalculated(false);
+    setManualCalculated(false);
+  }, [baseDate, countFromOne, tab]);
+
+  useEffect(() => {
+    if (tab === TAB_MANUAL) {
+      setManualCalculated(false);
+    }
+  }, [nDaysInput, tab]);
+
+  useEffect(() => {
+    // 첫 페인트 이후 광고 로드 (초기 로딩 체감 개선)
+    const w = typeof window !== 'undefined' ? window : null;
+    if (w?.requestIdleCallback) {
+      const id = w.requestIdleCallback(() => setShowBanner(true), { timeout: 1500 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setShowBanner(true), 700);
+    return () => clearTimeout(t);
+  }, []);
+
   const base = baseDate ? new Date(baseDate) : null;
+  const isBaseValid = !!baseDate && base instanceof Date && !Number.isNaN(base.getTime());
 
   const nDaysNum =
     nDaysInput.trim() === '' ? null : parseInt(nDaysInput, 10);
@@ -104,13 +132,29 @@ function CountPage() {
         {tab === TAB_AUTO && (
           <section className={styles.panel}>
             <p className={styles.panelLabel}>기준 날짜는?</p>
-            <input
-              type="date"
-              className={styles.dateDisplay}
-              value={baseDate}
-              onChange={(e) => setBaseDate(e.target.value)}
-              aria-label="기준 날짜"
-            />
+            <div className={styles.dateRow}>
+              <div className={styles.dateField}>
+                <DateTextInput
+                  className={styles.dateDisplay}
+                  value={baseDate}
+                  onChange={setBaseDate}
+                  ariaLabel="기준 날짜"
+                  placeholder="예) 20260304"
+                />
+              </div>
+              <button
+                type="button"
+                className={[
+                  styles.calcButton,
+                  isBaseValid ? styles.calcButtonEnabled : '',
+                  autoCalculated ? styles.calcButtonDone : '',
+                ].filter(Boolean).join(' ')}
+                disabled={!isBaseValid || autoCalculated}
+                onClick={() => setAutoCalculated(true)}
+              >
+                계산하기
+              </button>
+            </div>
             <label className={styles.checkboxLabel}>
               <input
                 type="checkbox"
@@ -122,7 +166,7 @@ function CountPage() {
                 기준일을 1일로 계산
               </span>
             </label>
-            {base && (
+            {base && autoCalculated && (
               <div className={styles.autoList}>
                 {AUTO_MILESTONE_DAYS.map((n) => {
                   const date = getNDaysDate(base, n, countFromOne);
@@ -149,13 +193,17 @@ function CountPage() {
         {tab === TAB_MANUAL && (
           <section className={styles.panel}>
             <p className={styles.panelLabel}>기준 날짜는?</p>
-            <input
-              type="date"
-              className={styles.dateDisplay}
-              value={baseDate}
-              onChange={(e) => setBaseDate(e.target.value)}
-              aria-label="기준 날짜"
-            />
+            <div className={styles.dateRow}>
+              <div className={styles.dateField}>
+                <DateTextInput
+                  className={styles.dateDisplay}
+                  value={baseDate}
+                  onChange={setBaseDate}
+                  ariaLabel="기준 날짜"
+                  placeholder="예) 20260304"
+                />
+              </div>
+            </div>
             <label className={styles.checkboxLabel}>
               <input
                 type="checkbox"
@@ -179,24 +227,39 @@ function CountPage() {
               value={nDaysInput}
               onChange={(e) => setNDaysInput(e.target.value)}
             />
-            <div className={styles.manualResultRow}>
-              <button
-                type="button"
-                className={styles.nDayButton}
-                onClick={() => {}}
-              >
-                +{nDaysInput.trim() || '600'}일
-              </button>
-              <span className={styles.manualDateText}>
-                {nDaysResult
-                  ? formatKoreanDateWithWeekday(nDaysResult)
-                  : '—'}
-              </span>
-            </div>
+            <button
+              type="button"
+              className={[
+                styles.calcButtonBottom,
+                isBaseValid && nDaysValid ? styles.calcButtonEnabled : '',
+                manualCalculated ? styles.calcButtonDone : '',
+              ].filter(Boolean).join(' ')}
+              disabled={!isBaseValid || !nDaysValid || manualCalculated}
+              onClick={() => setManualCalculated(true)}
+            >
+              계산하기
+            </button>
+            {manualCalculated && nDaysValid && (
+              <div className={styles.manualResultRow}>
+                {nDaysInput.trim() !== '' && (
+                  <button
+                    type="button"
+                    className={styles.nDayButton}
+                    onClick={() => {}}
+                  >
+                    {nDaysInput.trim()}일
+                  </button>
+                )}
+                <span className={styles.manualDateText}>
+                  {nDaysResult ? formatKoreanDateWithWeekday(nDaysResult) : '—'}
+                </span>
+              </div>
+            )}
           </section>
         )}
 
-        {/* <section className={styles.actions}>
+        {/*
+        <section className={styles.actions}>
           <button
             type="button"
             className={styles.primaryButton}
@@ -212,10 +275,15 @@ function CountPage() {
           >
             내 기념일 보러가기
           </button>
-        </section> */}
+        </section>
+        */}
       </div>
 
-      <BannerAd />
+      {showBanner && (
+        <Suspense fallback={null}>
+          <BannerAd />
+        </Suspense>
+      )}
 
       {showConfirmModal && (
         <div className={styles.modalOverlay} onClick={handleConfirmNo}>

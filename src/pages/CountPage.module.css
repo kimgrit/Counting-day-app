@@ -101,9 +101,21 @@
   width: 100%;
 }
 
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dateField {
+  flex: 1;
+  min-width: 0;
+}
+
 .dateDisplay {
   display: block;
-  width: calc(100% - 24px); /* 좌우 패딩 12px씩 제외 */
+  width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 10px;
@@ -111,14 +123,64 @@
   border: 1px solid #e5e7eb;
   font-size: 16px;
   color: #111827;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
 
+.calcButton {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(114, 92, 255, 0.25);
+  background: #ffffff;
+  color: var(--count-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.calcButtonBottom {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(114, 92, 255, 0.25);
+  background: #ffffff;
+  color: var(--count-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.calcButtonEnabled {
+  background: var(--count-primary);
+  border-color: var(--count-primary);
+  color: #ffffff;
+}
+
+.calcButtonDone {
+  opacity: 0.75;
+}
+
+.calcButton:not(:disabled):hover,
+.calcButtonBottom:not(:disabled):hover {
+  filter: brightness(0.98);
+}
+
+.calcButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.calcButtonBottom:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .input {
-  width: calc(100% - 24px); /* 동일하게 맞춤 */
+  width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 10px;
@@ -202,6 +264,24 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition: none;
+}
+
+.autoDayButton:hover,
+.autoDayButton:active,
+.autoDayButton:focus,
+.autoDayButton:focus-visible,
+.nDayButton:hover,
+.nDayButton:active,
+.nDayButton:focus,
+.nDayButton:focus-visible {
+  background: var(--count-primary) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
 }
 
 .autoDayButton {

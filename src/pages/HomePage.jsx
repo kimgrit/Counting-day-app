@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './HomePage.module.css';
 import { useAnniversaries } from '../hooks/useAnniversaries';
 import { formatKoreanDateWithWeekday } from '../utils/dday';
 import { useAppIntoss } from '../hooks/useAppIntoss';
 import { registerNotificationForAnniversary } from '../utils/notifications';
-import BannerAd from '../components/BannerAd';
+const BannerAd = lazy(() => import('../components/BannerAd'));
 
 const ORDINALS = ['첫', '두', '세', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
 
@@ -25,10 +25,21 @@ function HomePage() {
   const [expandedId, setExpandedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editingValue, setEditingValue] = useState('');
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     logScreen('View_page_home');
   }, [logScreen]);
+
+  useEffect(() => {
+    const w = typeof window !== 'undefined' ? window : null;
+    if (w?.requestIdleCallback) {
+      const id = w.requestIdleCallback(() => setShowBanner(true), { timeout: 1500 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setShowBanner(true), 700);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleNotificationToggle = async (item, enable) => {
     logClick('Click_btn_notification', { enable, anniversaryId: item.id });
@@ -179,7 +190,11 @@ function HomePage() {
         </section>
       </div>
 
-      <BannerAd />
+      {showBanner && (
+        <Suspense fallback={null}>
+          <BannerAd />
+        </Suspense>
+      )}
     </div>
   );
 }

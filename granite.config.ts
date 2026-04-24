@@ -8,7 +8,7 @@ export default defineConfig({
     icon: "https://static.toss.im/appsintoss/2223/cab8e14d-65b7-4eb1-9778-282fa5982fe0.png", // 화면에 노출될 앱의 아이콘 이미지 주소로 바꿔주세요.
   },
   web: {
-    host: '192.168.0.45',
+    host: '10.243.113.94',
     port: 5173,
     commands: {
       dev: 'vite --host',
